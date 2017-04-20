@@ -28,7 +28,8 @@ SDK_FLAGS = -DUSE_FREERTOS -DSL_PLATFORM_MULTI_THREADED
 # -DTARGET_IS_CC3200 would reduce code size by using functions in ROM
 # but then the code won't work on pre-release chips (XCC3200HZ).
 
-CFLAGS += -Os -Wall -Werror \
+# -Werror
+CFLAGS += -Os -Wall \
           $(SDK_FLAGS) -DCS_PLATFORM=4 -DCC3200_FS_SLFS \
           $(MONGOOSE_FEATURES) $(CFLAGS_EXTRA)
 
@@ -40,6 +41,9 @@ BUILD_INFO_JSON = $(OBJDIR)/build_info.json
 SLFS_FILES = $(wildcard $(SLFS_PATH)/*)
 
 .PHONY: all clean flash
+
+bin: $(OBJDIR) $(FW_DIR) $(FW_ELF) $(FW_BIN) $(SLFS_FILES)
+	@echo "    Code size: $(shell ls -l $(FW_BIN) | awk '{print $$5}')"
 
 all: $(OBJDIR) $(FW_DIR) $(FW_ZIP)
 
@@ -78,7 +82,7 @@ $(FW_ZIP): $(FW_ELF) $(FW_BIN) $(SLFS_FILES)
 	  --output=$@
 
 FREERTOS_SRCS = timers.c list.c queue.c tasks.c port.c heap_3.c osi_freertos.c
-DRIVER_SRCS = cpu.c gpio.c gpio_if.c i2c.c i2c_if.c interrupt.c pin.c prcm.c spi.c uart.c udma.c utils.c
+DRIVER_SRCS = cpu.c gpio.c gpio_if.c i2c.c i2c_if.c interrupt.c pin.c prcm.c spi.c uart.c udma.c utils.c timer.c
 SL_SRCS = socket.c wlan.c driver.c device.c netapp.c netcfg.c network_common.c cc_pal.c fs.c
 SDK_SRCS = startup_gcc.c $(FREERTOS_SRCS) $(DRIVER_SRCS) $(SL_SRCS)
 IPATH += $(SDK_PATH) $(SDK_PATH)/inc $(SDK_PATH)/driverlib \
